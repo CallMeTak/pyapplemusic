@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = [
+    "src"
+]
+[project]
+name = "pyapplemusic"
+version = "0.1.0"
+dependencies = [
+    "pydantic",
+    "requests"
+]
+
+authors = [
+    {name = "CallMeTak"},
+]
+description = "Python wrapper for the Apple Music API (Supports Library Resources!)"
+readme = "README.md"
