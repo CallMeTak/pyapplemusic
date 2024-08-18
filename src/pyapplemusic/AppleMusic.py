@@ -28,17 +28,18 @@ class Service:
             'Origin': 'https://music.apple.com'
         }
 
-    def perform_request(self, url: str, query_params: dict[str, Any] = {}) -> Union[None, Response]:
+    def perform_request(self, url: str, query_params: dict[str, Any] = {}, post = False, post_data = {}) -> Union[None, Response]:
         try:
-            response = self.__client.get(url, params=query_params)
+            if not post:
+                response = self.__client.get(url, params=query_params)
+            else:
+                response = self.__client.post(url, params=query_params, json=post_data)
         except requests.RequestException as err:
             print("Error performing request.")
             print(err)
             traceback.print_exc()
-            sys.exit(1)
         else:
-            status = response.status_code
-            if status != 200:
+            if not response.ok:
                 response.raise_for_status()
             return response
             # if status == 404:
@@ -179,6 +180,23 @@ class LibraryService(Service):
         print(response.json())
         return LibrarySearchResponse.model_validate_json(response.text)
 
+    def add_track_to_playlist(self, playlist_id: str, tracks: List[dict]):
+        data = tracks
+        response = self.perform_request(self.base_url + f"me/library/playlists/{playlist_id}/tracks", post=True, post_data=data)
+    
+
+    def create_playlist(self, name: str, tracks: List[dict], description: str = "") -> LibraryPlaylist:
+        post_data = {
+            "attributes": {
+                "name": name,
+                "description": description
+            },
+            "relationships": {
+                "tracks": tracks
+            }
+        }
+        response = self.perform_request(self.base_url + "me/library/playlists", post=True, post_data=post_data)
+       # return LibraryPlaylist.model_validate_json(response.text)
 
 class CatalogService(Service):
     def __init__(self, dev_token: str, media_token: str):
